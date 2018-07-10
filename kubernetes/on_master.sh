@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Updating Kubernetes Configuration
-tac /etc/systemd/system/kubelet.service.d/10-kubeadm.conf | awk '!p && /Environment/{print "Environment=\"cgroup-driver=systemd/cgroup-driver=cgroupfs\""; p=1} 1' | tac > /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+sudo tac /etc/systemd/system/kubelet.service.d/10-kubeadm.conf | sudo awk '!p && /Environment/{print "Environment=\"cgroup-driver=systemd/cgroup-driver=cgroupfs\""; p=1} 1' | sudo tac > /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 # todo -> ssh on master
 mapfile ips < /tmp/ips
-kubeadm init --apiserver-advertise-address=${ips[0]} --pod-network-cidr=192.168.0.0/16 | grep "kubeadm join" > /tmp/joincommand
+sudo kubeadm init --apiserver-advertise-address=${ips[0]} --pod-network-cidr=192.168.0.0/16 | grep "kubeadm join" > /tmp/joincommand
 
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
