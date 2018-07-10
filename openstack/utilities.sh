@@ -65,6 +65,13 @@ function vmlaunch() {
       sleep 30
     fi
   done
+  
+  for i in $(openstack port list | tail -n+4 | head -n-1 | cut -d"|" -f2 | tr -d ' ')
+  do
+    openstack port set --no-security-group --disable-port-security $i || echo "Error on $i"
+    sleep 5
+  done
+  
   if [ "$toExit" -ne 0 ]
   then
     echo "Shit's on fire bro"
