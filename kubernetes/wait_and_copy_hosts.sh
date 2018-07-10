@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #assume ips are stored in /tmp/ips file
-mapfile ips < /tmp/ips
+read -a ips <<< $(cat /tmp/ips )
 echo $(pwd)
 for i in ${ips[@]}
 do
@@ -15,5 +15,7 @@ done
 
 for i in ${ips[@]}
 do
-  scp -i kp- -oStrictHostKeyChecking=no /tmp/hosts ubuntu@$i:/etc/hosts
+  scp -i kp- -oStrictHostKeyChecking=no /tmp/hosts ubuntu@$i:/home/ubuntu/hosts
+  scp -i kp- -oStrictHostKeyChecking=no /tmp/ips ubuntu@$i:/tmp/ips
+  ssh -i kp- -oStrictHostKeyChecking=no ubuntu@$i "sudo cp /home/ubuntu/hosts /etc/hosts"
 done
