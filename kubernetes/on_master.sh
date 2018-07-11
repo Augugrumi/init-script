@@ -165,5 +165,8 @@ do
   ssh ubuntu@$i -oStrictHostKeyChecking=no -i kp- "$(cat /home/ubuntu/joincommand)" &
 done
 
-msg info "***************** YOUR SECRET TOKEN *****************"
+# print the secret token to access kubernetes dashboard
+msg info "******************* YOUR SECRET TOKEN *******************"
 cat secret.txt
+echo "\n"
+msg info "*********************************************************"
