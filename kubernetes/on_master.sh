@@ -162,11 +162,21 @@ screen -S kubectl_proxy_screen -X stuff "kubectl proxy
 # run join command on all 
 for i in ${ips[@]}
 do
-  ssh ubuntu@$i -oStrictHostKeyChecking=no -i kp- "$(cat /home/ubuntu/joincommand)" &
+  scp -i kp- -oStrictHostKeyChecking=no /tmp/hosts ubuntu@$i:/home/ubuntu/hosts
+  ssh -i kp- -oStrictHostKeyChecking=no ubuntu@$i "sudo cp /home/ubuntu/hosts /etc/hosts"
+
+  scp -i kp- -oStrictHostKeyChecking=no /tmp/ips ubuntu@$i:/tmp/ips
+done
+
+for i in ${ips[@]}
+do
+  scp -i kp- -oStrictHostKeyChecking=no /home/ubuntu/joincommand ubuntu@$i:/home/ubuntu/joincommand
+  ssh ubuntu@$i -oStrictHostKeyChecking=no -i kp- "sudo bash <(cat /home/ubuntu/joincommand)" &
 done
 
 # print the secret token to access kubernetes dashboard
 msg info "******************* YOUR SECRET TOKEN *******************"
 cat secret.txt
-echo "\n"
+echo "
+"
 msg info "*********************************************************"
