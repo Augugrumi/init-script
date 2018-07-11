@@ -1,4 +1,4 @@
-# Script to join an existing cluster
+# Script to join an existing k8s cluster
 This script assume you are on **master node**, the key to access other machines is **kp-** and the command to join the cluster is stored in a file called **joincommand** in the same folder of the script.
 You can run:
 ```bash
