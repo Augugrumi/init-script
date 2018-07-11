@@ -77,6 +77,8 @@ if [ "$toExit" -ne 0 ]; then
     # copying hosts to first ssh
     scp -i kp- -oStrictHostKeyChecking=no -P 10243 /tmp/hosts ubuntu@openstack.math.unipd.it:/tmp/hosts
 
+    ssh -i kp- -oStrictHostKeyChecking=no -p 10243 ubuntu@openstack.math.unipd.it "scp -i kp- -oStrictHostKeyChecking=no /home/ubuntu/kp- ubuntu@${ips[0]}:/home/ubuntu/kp-"
+
     sleep 30
 
     # wait that all host are ready
