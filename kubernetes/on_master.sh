@@ -121,6 +121,22 @@ function wait_ready() {
   done
 }
 
+# function that waits until all nodes are ready
+function wait_nodes_ready() {
+  finished=1
+  while [ "$finished" -ne 0 ]; do
+    finished=0
+    for i in $(kubectl get nodes | tail -n +2 | awk -F"   " '{$0=$2}1' | tr -d ' ')
+    do
+      if [ "$i" = "NotReady" ]; then
+        finished=1
+        sleep 2
+        break
+      fi
+    done
+  done
+}
+
 # Updating Kubernetes Configuratio -> exesudo to run function with sudoers privileges
 exesudo 'addLine' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
@@ -160,18 +176,20 @@ screen -S kubectl_proxy_screen -X stuff "kubectl proxy
 "
 
 # run join command on all 
-for i in ${ips[@]}
-do
-  scp -i kp- -oStrictHostKeyChecking=no /tmp/hosts ubuntu@$i:/home/ubuntu/hosts
-  ssh -i kp- -oStrictHostKeyChecking=no ubuntu@$i "sudo cp /home/ubuntu/hosts /etc/hosts"
+#for i in ${ips[@]}
+#do
+#  scp -i kp- -oStrictHostKeyChecking=no /tmp/hosts ubuntu@$i:/home/ubuntu/hosts
+#  ssh -i kp- -oStrictHostKeyChecking=no ubuntu@$i "sudo cp /home/ubuntu/hosts /etc/hosts"
+#
+#  scp -i kp- -oStrictHostKeyChecking=no /tmp/ips ubuntu@$i:/tmp/ips
+#done
 
-  scp -i kp- -oStrictHostKeyChecking=no /tmp/ips ubuntu@$i:/tmp/ips
-done
+wait_nodes_ready
 
 for i in ${ips[@]}
 do
   scp -i kp- -oStrictHostKeyChecking=no /home/ubuntu/joincommand ubuntu@$i:/home/ubuntu/joincommand
-  ssh ubuntu@$i -oStrictHostKeyChecking=no -i kp- "sudo bash <(cat /home/ubuntu/joincommand)" &
+  ssh ubuntu@$i -oStrictHostKeyChecking=no -i kp- "sudo bash joincommand" &
 done
 
 # print the secret token to access kubernetes dashboard
