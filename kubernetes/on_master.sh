@@ -141,7 +141,7 @@ function wait_nodes_ready() {
 exesudo 'addLine' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 # require ips file in /tmp/ with the array of ips of the hosts
-read -a ips <<< $(cat /tmp/ips)
+read -a ips <<< $(cat $1)
 # init kubeadm and save join string taking first ip as master
 sudo kubeadm init --apiserver-advertise-address=${ips[0]} --pod-network-cidr=192.168.0.0/16 | grep "kubeadm join" > /home/ubuntu/joincommand
 
@@ -174,15 +174,6 @@ kubectl get secret $(kubectl get serviceaccount dashboard -o jsonpath="{.secrets
 screen -dmS kubectl_proxy_screen bash
 screen -S kubectl_proxy_screen -X stuff "kubectl proxy
 "
-
-# run join command on all 
-#for i in ${ips[@]}
-#do
-#  scp -i kp- -oStrictHostKeyChecking=no /tmp/hosts ubuntu@$i:/home/ubuntu/hosts
-#  ssh -i kp- -oStrictHostKeyChecking=no ubuntu@$i "sudo cp /home/ubuntu/hosts /etc/hosts"
-#
-#  scp -i kp- -oStrictHostKeyChecking=no /tmp/ips ubuntu@$i:/tmp/ips
-#done
 
 wait_nodes_ready
 

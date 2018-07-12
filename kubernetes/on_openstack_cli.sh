@@ -61,28 +61,29 @@ if [ "$toExit" -ne 0 ]; then
     echo "Shit's on fire bro"
   else
     # copying all the ips to the ubuntu firts ssh
-    echo "${ips[@]}" > /tmp/ips
-    scp -i kp- -oStrictHostKeyChecking=no -P 10243 /tmp/ips ubuntu@openstack.math.unipd.it:/tmp/ips
+    ipsfile=$(mktemp)
+    echo "${ips[@]}" > $ipsfile
+    scp -i kp- -oStrictHostKeyChecking=no -P 10243 $ipsfile ubuntu@openstack.math.unipd.it:$ipsfile
 
     echo ${ips[@]}
     rm .ssh/known_hosts
-    ssh -i kp- -oStrictHostKeyChecking=no -p 10243 ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/install_kubectl_repo.sh)"
+    ssh -i kp- -oStrictHostKeyChecking=no -p 10243 ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/install_kubectl_repo.sh) $ipsfile"
 
-    echo "" > /tmp/hosts
+    hostsfile=$(mktemp)
     # create etc/hosts
     for i in ${ips[@]}; do
-      echo "$i $(nova list | grep $i | cut -d"|" -f3 | tr -d '[:space:]')" >> /tmp/hosts
+      echo "$i $(nova list | grep $i | cut -d"|" -f3 | tr -d '[:space:]')" >> $hostsfile
     done
 
     # copying hosts to first ssh
-    scp -i kp- -oStrictHostKeyChecking=no -P 10243 /tmp/hosts ubuntu@openstack.math.unipd.it:/tmp/hosts
+    scp -i kp- -oStrictHostKeyChecking=no -P 10243 $hostsfile ubuntu@openstack.math.unipd.it:$hostsfile
 
     ssh -i kp- -oStrictHostKeyChecking=no -p 10243 ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && scp -i kp- -oStrictHostKeyChecking=no /home/ubuntu/kp- ubuntu@${ips[0]}:/home/ubuntu/kp-"
 
     sleep 30
 
     # wait that all host are ready
-    ssh -oStrictHostKeyChecking=no -i kp- -p 10243 ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/wait_and_copy_hosts.sh)"
+    ssh -oStrictHostKeyChecking=no -i kp- -p 10243 ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/wait_and_copy_hosts.sh) $ipsfile $hostsfile"
 
-    ssh -i kp- -oStrictHostKeyChecking=no -p 10243 ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && ssh ubuntu@${ips[0]} -oStrictHostKeyChecking=no -i kp- \"bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/on_master.sh)\""
+    ssh -i kp- -oStrictHostKeyChecking=no -p 10243 ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && ssh ubuntu@${ips[0]} -oStrictHostKeyChecking=no -i kp- \"bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/on_master.sh) $1\""
 fi

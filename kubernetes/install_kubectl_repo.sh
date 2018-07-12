@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # require ips file in /tmp/ with the array of ips of the hosts
-read -a ips <<< $(cat /tmp/ips)
+read -a ips <<< $(cat $1)
  
 toWait=()
 echo ${ips[@]}
