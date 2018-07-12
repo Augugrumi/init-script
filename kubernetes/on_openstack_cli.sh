@@ -66,7 +66,7 @@ if [ "$toExit" -ne 0 ]; then
 
     echo ${ips[@]}
     rm .ssh/known_hosts
-    ssh -i kp- -oStrictHostKeyChecking=no -p 10243 ubuntu@openstack.math.unipd.it "bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/install_kubectl_repo.sh)"
+    ssh -i kp- -oStrictHostKeyChecking=no -p 10243 ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/install_kubectl_repo.sh)"
 
     echo "" > /tmp/hosts
     # create etc/hosts
@@ -77,12 +77,12 @@ if [ "$toExit" -ne 0 ]; then
     # copying hosts to first ssh
     scp -i kp- -oStrictHostKeyChecking=no -P 10243 /tmp/hosts ubuntu@openstack.math.unipd.it:/tmp/hosts
 
-    ssh -i kp- -oStrictHostKeyChecking=no -p 10243 ubuntu@openstack.math.unipd.it "scp -i kp- -oStrictHostKeyChecking=no /home/ubuntu/kp- ubuntu@${ips[0]}:/home/ubuntu/kp-"
+    ssh -i kp- -oStrictHostKeyChecking=no -p 10243 ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && scp -i kp- -oStrictHostKeyChecking=no /home/ubuntu/kp- ubuntu@${ips[0]}:/home/ubuntu/kp-"
 
     sleep 30
 
     # wait that all host are ready
-    ssh -oStrictHostKeyChecking=no -i kp- -p 10243 ubuntu@openstack.math.unipd.it "bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/wait_and_copy_hosts.sh)"
+    ssh -oStrictHostKeyChecking=no -i kp- -p 10243 ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/wait_and_copy_hosts.sh)"
 
-    ssh -i kp- -oStrictHostKeyChecking=no -p 10243 ubuntu@openstack.math.unipd.it "ssh ubuntu@${ips[0]} -oStrictHostKeyChecking=no -i kp- \"bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/on_master.sh)\""
+    ssh -i kp- -oStrictHostKeyChecking=no -p 10243 ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && ssh ubuntu@${ips[0]} -oStrictHostKeyChecking=no -i kp- \"bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/on_master.sh)\""
 fi
