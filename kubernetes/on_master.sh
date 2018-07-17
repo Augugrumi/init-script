@@ -143,7 +143,7 @@ exesudo 'addLine' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 # require ips file in /tmp/ with the array of ips of the hosts
 read -a ips <<< $(cat $1)
 # init kubeadm and save join string taking first ip as master
-sudo kubeadm init --apiserver-advertise-address=${ips[0]} --pod-network-cidr=192.168.0.0/16 | grep "kubeadm join" > /home/ubuntu/joincommand
+sudo kubeadm init --apiserver-advertise-address=${ips[0]} --pod-network-cidr=192.168.0.0/16 | grep "kubeadm join" > /home/centos/joincommand
 
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -179,8 +179,8 @@ wait_nodes_ready
 
 for i in ${ips[@]}
 do
-  scp -i kp- -oStrictHostKeyChecking=no /home/ubuntu/joincommand ubuntu@$i:/home/ubuntu/joincommand
-  ssh ubuntu@$i -oStrictHostKeyChecking=no -i kp- "sudo bash joincommand" &
+  scp -i kp- -oStrictHostKeyChecking=no /home/centos/joincommand centos@$i:/home/centos/joincommand
+  ssh centos@$i -oStrictHostKeyChecking=no -i kp- "sudo bash joincommand" &
 done
 
 # print the secret token to access kubernetes dashboard
