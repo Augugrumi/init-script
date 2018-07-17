@@ -138,7 +138,7 @@ function wait_nodes_ready() {
 }
 
 # Updating Kubernetes Configuratio -> exesudo to run function with sudoers privileges
-exesudo 'addLine' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+#exesudo 'addLine' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 # require ips file in /tmp/ with the array of ips of the hosts
 read -a ips <<< $(cat $1)
