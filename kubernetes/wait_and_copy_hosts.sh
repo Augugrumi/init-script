@@ -18,7 +18,7 @@ done
 for i in ${ips[@]}
 do
   scp -i kp- -oStrictHostKeyChecking=no $2 ubuntu@$i:$2
-  ssh -i kp- -oStrictHostKeyChecking=no ubuntu@$i "sudo cp $2 /etc/hosts"
+  ssh -i kp- -oStrictHostKeyChecking=no ubuntu@$i "echo $2 | sudo tee -a /etc/hosts"
 
   scp -i kp- -oStrictHostKeyChecking=no $1 ubuntu@$i:$1
 done
