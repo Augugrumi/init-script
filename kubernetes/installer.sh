@@ -7,4 +7,4 @@ while getopts ":b:" opt; do
         esac
 done
 
-bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/on_openstack_cli.sh) $@
+bash +x <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/on_openstack_cli.sh) $@
