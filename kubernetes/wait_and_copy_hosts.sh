@@ -23,7 +23,7 @@ done
 
 msg info "Copying hosts and other ips in all machines"
 
-msg warn "Hostfile content: $2"
+msg warn "Hostfile content: $(cat $2)"
 # copy hosts and other ips in all machines
 for i in ${ips[@]}
 do
@@ -31,3 +31,4 @@ do
   ssh -i kp- -oStrictHostKeyChecking=no centos@$i "sudo cat $2 | sudo tee -a /etc/hosts"
   scp -i kp- -oStrictHostKeyChecking=no $1 centos@$i:$1
 done
+msg info "Done copying /etc/hosts"
