@@ -56,6 +56,7 @@ if [ "$toExit" -ne 0 ]; then
 
     echo ${ips[@]}
     rm .ssh/known_hosts
+    msg info "Launching install_kubectl_repo"
     ssh -i kp- -oStrictHostKeyChecking=no -p $port ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && bash -x <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/install_kubectl_repo.sh) $ipsfile"
 
     hostsfile=$(mktemp)
@@ -64,15 +65,20 @@ if [ "$toExit" -ne 0 ]; then
       echo "$i $(nova list | grep $i | cut -d"|" -f3 | tr -d '[:space:]')" >> $hostsfile
     done
 
+    msg info "Copying the keys in every machine..."
     # copying hosts to first ssh
     scp -i kp- -oStrictHostKeyChecking=no -P $port $hostsfile ubuntu@openstack.math.unipd.it:$hostsfile
 
     ssh -i kp- -oStrictHostKeyChecking=no -p $port ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && scp -i kp- -oStrictHostKeyChecking=no /home/ubuntu/kp- centos@${ips[0]}:/home/centos/kp-"
+    msg info "Done copying the keys"
 
+    msg warn "Sleeping 30 sec..."
     sleep 30
 
+    msg info "Waiting that all the nodes are up..."
     # wait that all host are ready
     ssh -oStrictHostKeyChecking=no -i kp- -p $port ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && bash -x <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/wait_and_copy_hosts.sh) $ipsfile $hostsfile"
 
+    msg info "Finalizing the cluster in the master..."
     ssh -i kp- -oStrictHostKeyChecking=no -p $port ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && ssh centos@${ips[0]} -oStrictHostKeyChecking=no -i kp- \"bash -x <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/on_master.sh) $ipsfile\""
 fi

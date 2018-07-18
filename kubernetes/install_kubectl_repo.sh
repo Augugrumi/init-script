@@ -26,4 +26,4 @@ do
     wait $i
 done
 
-msg info "All nodes are up and running, exiting install_kubectl_repo.sh"
+msg info "All nodes have finished their job, exiting install_kubectl_repo.sh"
