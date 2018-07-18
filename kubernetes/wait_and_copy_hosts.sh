@@ -18,7 +18,7 @@ done
 for i in ${ips[@]}
 do
   scp -i kp- -oStrictHostKeyChecking=no $2 centos@$i:$2
-  ssh -i kp- -oStrictHostKeyChecking=no centos@$i "echo $2 | sudo tee -a /etc/hosts"
+  ssh -i kp- -oStrictHostKeyChecking=no centos@$i "sudo cat $2 | sudo tee -a /etc/hosts"
 
   scp -i kp- -oStrictHostKeyChecking=no $1 centos@$i:$1
 done

@@ -1,25 +1,8 @@
 #!/bin/bash
 
-function msg () {
-    # 3 type of messages:
-    # - info
-    # - warn
-    # - err
-    local color=""
-    local readonly default="\033[m" #reset
-    if [ "$1" = "info" ]
-    then
-        color="\033[0;32m" #green
-    elif [ "$1" = "warn" ]
-    then
-        color="\033[1;33m" #yellow
-    elif [ "$1" = "err" ]
-    then
-        color="\033[0;31m" #red
-    fi
+. <(curl -s https://raw.githubusercontent.com/Polpetta/minibashlib/master/minibashlib.sh)
 
-    echo -e "$color==> $2$default"
-}
+mb_load "logging"
 
 function validateIP() {
   if [[ $1 =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -27,6 +10,15 @@ function validateIP() {
   else
     echo 1
   fi
+}
+
+function wait_node() {
+  rc=1
+  while [[ $rc -ne 0 ]]
+    do
+      ping $1 -c1
+      rc=$?
+    done
 }
 
 ips=()
@@ -68,29 +60,39 @@ if [ "$toExit" -ne 0 ]; then
     echo "Shit's on fire bro"
   else
     # copying all the ips to the ubuntu firts ssh
+    msg warn "1"
     ipsfile=$(mktemp)
     echo "${ips[@]}" > $ipsfile
     scp -i kp- -oStrictHostKeyChecking=no -P $port $ipsfile ubuntu@openstack.math.unipd.it:$ipsfile
 
+    msg warn "2"
     echo ${ips[@]}
     rm .ssh/known_hosts
     ssh -i kp- -oStrictHostKeyChecking=no -p $port ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && bash -x <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/install_kubectl_repo.sh) $ipsfile"
 
+    for i in ${ips[@]}
+    do
+      ssh -i kp- -oStrictHostKeyChecking=no -p $port ubuntu@openstack.math.unipd.it "$(typeset -f wait_node); wait_node $i"
+    done
+
+    msg warn "3"
     hostsfile=$(mktemp)
     # create etc/hosts
     for i in ${ips[@]}; do
       echo "$i $(nova list | grep $i | cut -d"|" -f3 | tr -d '[:space:]')" >> $hostsfile
     done
 
+    msg warn "4"
     # copying hosts to first ssh
     scp -i kp- -oStrictHostKeyChecking=no -P $port $hostsfile ubuntu@openstack.math.unipd.it:$hostsfile
 
+    msg warn "5"
     ssh -i kp- -oStrictHostKeyChecking=no -p $port ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && scp -i kp- -oStrictHostKeyChecking=no /home/ubuntu/kp- centos@${ips[0]}:/home/centos/kp-"
 
-    sleep 30
-
+    msg warn "6"
     # wait that all host are ready
     ssh -oStrictHostKeyChecking=no -i kp- -p $port ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && bash -x <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/wait_and_copy_hosts.sh) $ipsfile $hostsfile"
 
+    msg warn "7"
     ssh -i kp- -oStrictHostKeyChecking=no -p $port ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && ssh centos@${ips[0]} -oStrictHostKeyChecking=no -i kp- \"bash -x <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/on_master.sh) $ipsfile\""
 fi
