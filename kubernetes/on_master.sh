@@ -2,81 +2,6 @@
 
 . <(curl -s https://raw.githubusercontent.com/Polpetta/minibashlib/master/minibashlib.sh)
 
-function exesudo ()
-{
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ##
-    #
-    # LOCAL VARIABLES:
-    #
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ##
-
-    #
-    # I use underscores to remember it's been passed
-    local _funcname_="$1"
-
-    local params=( "$@" )               ## array containing all params passed here
-    local tmpfile="/dev/shm/$RANDOM"    ## temporary file
-    local filecontent                   ## content of the temporary file
-    local regex                         ## regular expression
-    local func                          ## function source
-
-
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ##
-    #
-    # MAIN CODE:
-    #
-    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ##
-
-    #
-    # WORKING ON PARAMS:
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    #
-    # Shift the first param (which is the name of the function)
-    unset params[0]              ## remove first element
-    # params=( "${params[@]}" )     ## repack array
-
-
-    #
-    # WORKING ON THE TEMPORARY FILE:
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    content="#!/bin/bash\n\n"
-
-    #
-    # Write the params array
-    content="${content}params=(\n"
-
-    regex="\s+"
-    for param in "${params[@]}"
-    do
-        if [[ "$param" =~ $regex ]]
-            then
-                content="${content}\t\"${param}\"\n"
-            else
-                content="${content}\t${param}\n"
-        fi
-    done
-
-    content="$content)\n"
-    echo -e "$content" > "$tmpfile"
-
-    #
-    # Append the function source
-    echo "#$( type "$_funcname_" )" >> "$tmpfile"
-
-    #
-    # Append the call to the function
-    echo -e "\n$_funcname_ \"\${params[@]}\"\n" >> "$tmpfile"
-
-
-    #
-    # DONE: EXECUTE THE TEMPORARY FILE WITH SUDO
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    sudo bash "$tmpfile"
-    rm "$tmpfile"
-}
-
 # function to add Environment="cgroup-driver=systemd/cgroup-driver=cgroupfs" to k8s configuration file
 function addLine() {
   sudo chmod 666 $1 
@@ -120,8 +45,8 @@ function wait_nodes_ready() {
 
 mb_load
 
-# Updating Kubernetes Configuratio -> exesudo to run function with sudoers privileges
-#exesudo 'addLine' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+# Updating Kubernetes Configuratio -> exec_root_func to run function with sudoers privileges
+#exec_root_func 'addLine' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 # require ips file in /tmp/ with the array of ips of the hosts
 read -a ips <<< $(cat $1)
@@ -134,8 +59,13 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 kubectl get pods --all-namespaces | wait_ready
 
-# set up calico
-kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+# set up flannel
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+# waits for pods
+kubectl get pods --all-namespaces | wait_ready
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k8s-manifests/kube-flannel-rbac.yml
 
 # waits for pods
 kubectl get pods --all-namespaces | wait_ready
@@ -168,7 +98,5 @@ done
 
 # print the secret token to access kubernetes dashboard
 msg info "******************* YOUR SECRET TOKEN *******************"
-cat secret.txt
-echo "
-"
+cat secret.txt && echo ""
 msg info "*********************************************************"
