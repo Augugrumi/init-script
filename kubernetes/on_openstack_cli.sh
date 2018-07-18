@@ -1,25 +1,6 @@
 #!/bin/bash
 
-function msg () {
-    # 3 type of messages:
-    # - info
-    # - warn
-    # - err
-    local color=""
-    local readonly default="\033[m" #reset
-    if [ "$1" = "info" ]
-    then
-        color="\033[0;32m" #green
-    elif [ "$1" = "warn" ]
-    then
-        color="\033[1;33m" #yellow
-    elif [ "$1" = "err" ]
-    then
-        color="\033[0;31m" #red
-    fi
-
-    echo -e "$color==> $2$default"
-}
+. <(curl -s https://raw.githubusercontent.com/Polpetta/minibashlib/master/minibashlib.sh)
 
 function validateIP() {
   if [[ $1 =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -29,6 +10,7 @@ function validateIP() {
   fi
 }
 
+mb_load "logging"
 ips=()
 toExit=0
 branch="master"
