@@ -38,7 +38,7 @@ echo ${ips[@]}
 for i in ${ips[@]}
 do
     # update machiens and install necessary sw
-    ssh ubuntu@$i -oStrictHostKeyChecking=no -i kp- "sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get autoclean && sudo apt-get autoremove -y && sudo apt-get install htop -y && bash <(curl -s https://raw.githubusercontent.com/Augugrumi/vagrantfiles/master/kubernetes/ubuntu16/bootstrap.sh) && sudo reboot" &
+    ssh centos@$i -oStrictHostKeyChecking=no -i kp- "sudo yum upgrade -y && bash <(curl -s https://raw.githubusercontent.com/Augugrumi/vagrantfiles/oldversion/kubernetes/centos/bootstrap.sh) && sudo reboot" &
     # store all PID of process in order to wait until all machine are ready and rebooted
     toWait+=($!)
 done
@@ -52,6 +52,6 @@ done
 
 for i in ${ips[@]}
 do
-  scp -i kp- -oStrictHostKeyChecking=no /home/ubuntu/joincommand ubuntu@$i:/home/ubuntu/joincommand
-  ssh ubuntu@$i -oStrictHostKeyChecking=no -i kp- "sudo bash joincommand" &
+  scp -i kp- -oStrictHostKeyChecking=no /home/centos/joincommand centos@$i:/home/centos/joincommand
+  ssh centos@$i -oStrictHostKeyChecking=no -i kp- "sudo bash joincommand" &
 done
