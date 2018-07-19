@@ -49,6 +49,8 @@ msg warn $port
 if [ "$toExit" -ne 0 ]; then
     echo "Shit's on fire bro"
   else
+    set -e
+    set -x
     # copying all the ips to the ubuntu firts ssh
     ipsfile=$(mktemp)
     echo "${ips[@]}" > $ipsfile
@@ -58,6 +60,8 @@ if [ "$toExit" -ne 0 ]; then
     rm .ssh/known_hosts
     msg info "Launching install_kubectl_repo"
     ssh -i kp- -oStrictHostKeyChecking=no -p $port ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && bash -x <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/install_kubectl_repo.sh) $ipsfile"
+
+    wait $!
 
     msg info "Generating /etc/hosts file"
     hostsfile=$(mktemp)
@@ -84,4 +88,6 @@ if [ "$toExit" -ne 0 ]; then
     msg info "Finalizing the cluster in the master..."
     ssh -oStrictHostKeyChecking=no -i kp- -p $port ubuntu@openstack.math.unipd.it "rm -f .ssh/known_hosts && ssh centos@${ips[0]} -oStrictHostKeyChecking=no -i kp- \"bash -x <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/on_master.sh) $ipsfile\""
     msg info "Cluster finalized! Happy hacking ;)"
+    set +e
+    set +x
 fi
