@@ -51,7 +51,7 @@ mb_load
 # require ips file in /tmp/ with the array of ips of the hosts
 read -a ips <<< $(cat $1)
 # init kubeadm and save join string taking first ip as master
-sudo kubeadm init --apiserver-advertise-address=${ips[0]} --pod-network-cidr=192.168.0.0/16 | grep "kubeadm join" > /home/centos/joincommand
+sudo kubeadm init --apiserver-advertise-address=${ips[0]} --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=cri | grep "kubeadm join" > /home/centos/joincommand
 
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
