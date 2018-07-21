@@ -151,8 +151,8 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 kubectl get pods --all-namespaces | wait_ready
 
-# set up calico
-kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+# set up flannel
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
 # waits for pods
 kubectl get pods --all-namespaces | wait_ready
