@@ -180,7 +180,7 @@ wait_nodes_ready
 for i in ${ips[@]}
 do
   scp -i kp- -oStrictHostKeyChecking=no /home/centos/joincommand centos@$i:/home/centos/joincommand
-  ssh centos@$i -oStrictHostKeyChecking=no -i kp- " echo -n ' --ignore-preflight-errors cri' >> joincommand; sudo bash -x joincommand" &
+  ssh centos@$i -oStrictHostKeyChecking=no -i kp- "sed -i '$ s/$/ --ignore-preflight-errors cri/' a >> joincommand; sudo bash -x joincommand" &
 done
 
 # print the secret token to access kubernetes dashboard
