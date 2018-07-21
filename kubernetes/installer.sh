@@ -1,3 +1,5 @@
+#!/bin/bash
+
 branch="master"
 while getopts ":b:" opt; do
         case $opt in
@@ -7,4 +9,4 @@ while getopts ":b:" opt; do
         esac
 done
 
-bash +x <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/on_openstack_cli.sh) $@
+bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/$branch/kubernetes/on_openstack_cli.sh) $@
