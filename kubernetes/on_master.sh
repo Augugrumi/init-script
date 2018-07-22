@@ -40,7 +40,7 @@ function wait_nodes_ready() {
 
 function main() {
   # install screen for dashboard
-  sudo yum install screen
+  sudo yum install -y screen
 
   # require ips file in /tmp/ with the array of ips of the hosts
   read -a ips <<< $(cat $1)
