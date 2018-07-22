@@ -39,7 +39,7 @@ function main() {
   while getopts ":a:b:p:" opt; do
           case $opt in
               a)
-  		valid=$(validateIP $OPTARG)
+                  valid=$(validateIP $OPTARG)
                   if [ "$valid" -eq 0 ]; then
                     ips+=("$OPTARG")
                   else
