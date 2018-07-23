@@ -16,7 +16,7 @@ function load_kernel_modules() {
 }
 
 function label_nodes() {
-  read -a slaves <<< $(nova list | tail -n+2 | grep -v master | cut -d" " -f1)
+  read -a slaves <<< $(kubectl get nodes | tail -n+2 | grep -v master | cut -d" " -f1)
   for i in ${slaves[@]}
   do
     kubectl label node $i storagenode=glusterfs
@@ -29,14 +29,33 @@ function allow_root_ssh() {
   sudo systemctl restart sshd
 }
 
+function create_node() {
+  echo '{"node":{"hostnames":{"manage":["'$1'"],"storage":["'$1'"]},"zone":1},"devices":["/dev/vdb"]}'
+}
+
+function create_cluster() {
+  ips=("$@")
+  start='{"clusters":[{"nodes":['
+  for ((i=1; i<${#ips[@]}; i++))
+  do
+    start=$start$(create_node ${ips[i]})
+    if [[ "$i" -ne $((${#ips[@]}-1)) ]]
+    then
+      start=$start","
+    fi
+  done
+  start=$start']}]}'
+  echo $start
+}
+
 # default values
 ips=()
 branch="master"
-port=10243
+topology="topology.json"
 toExit=0
 
 # catch arguments passed
-while getopts ":a:b:p:" opt; do
+while getopts ":a:b:t:" opt; do
         case $opt in
             a)
                 valid=$(validateIP $OPTARG)
@@ -50,8 +69,8 @@ while getopts ":a:b:p:" opt; do
             b)
                 branch="$OPTARG"
                 ;;
-            p)
-                port="$OPTARG"
+            t)
+                topology="$OPTARG"
                 ;;
             \?)
                 msg err "Invalid option: -$OPTARG" >&2
@@ -72,12 +91,11 @@ do
   then
     ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y git"
     toWait+=($!)
-  else
-    ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y centos-release-gluster"
-    ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y glusterfs-server"
-    ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y glusterfs-fuse"
-    toWait+=($!)
   fi
+  ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y centos-release-gluster"
+  ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y glusterfs-server"
+  ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y glusterfs-fuse"
+  toWait+=($!)
 done
 
 # for i in ${toWait[@]}
@@ -86,13 +104,13 @@ done
 # done
 
 # start glusterd ONLY ON SLAVES
-for ((i=1; i<${#ips[@]}; i++))
+for ((i=0; i<${#ips[@]}; i++))
 do
   ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo systemctl start glusterd && sudo systemctl enable glusterd"
 done
 
-# start kernel modules ONLY ON SLAVES
-for ((i=1; i<${#ips[@]}; i++))
+# start kernel modules
+for ((i=0; i<${#ips[@]}; i++))
 do
   ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "$(typeset -f load_kernel_modules); load_kernel_modules"
 done
@@ -108,3 +126,12 @@ done
 
 # clone gluster k8s repository
 ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[0]} "git clone https://github.com/gluster/gluster-kubernetes.git"
+
+# create topology file
+topology=$(mktemp /tmp/topology.XXXXXXXXXX --suffix=".json")
+create_cluster ${ips[@]} > $topology
+scp -i kp- -oStrictHostKeyChecking=no $topology centos@${ips[0]}:$topology
+
+# launch gluster deploy
+ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[0]} "cd gluster-kubernetes/deploy && ./gk-deploy -s ../../kp- --ssh-user root --ssh-port 22 $topology -y"
+
