@@ -82,7 +82,7 @@ function main() {
       msg info "Generating /etc/hosts file"
       hostsfile=$(mktemp)
       for i in ${ips[@]}; do
-        echo "$i $(nova list | grep $i | cut -d"|" -f3 | tr -d '[:space:]')" >> $hostsfile
+        echo "$i $(nova list | grep $i | cut -d"|" -f3 | tr -d '[:space:]').novalocal" >> $hostsfile
       done
 
       # wait for all nodes are rebooted
