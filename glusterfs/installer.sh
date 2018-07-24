@@ -103,11 +103,6 @@ done
 #     wait $i
 # done
 
-# start glusterd ONLY ON SLAVES
-for ((i=0; i<${#ips[@]}; i++))
-do
-  ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo systemctl start glusterd && sudo systemctl enable glusterd"
-done
 
 # start kernel modules
 for ((i=0; i<${#ips[@]}; i++))
@@ -117,6 +112,12 @@ done
 
 # label SLAVES as storage nodes
 ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[0]} "$(typeset -f label_nodes); label_nodes"
+
+# start glusterd ONLY ON SLAVES
+for ((i=0; i<${#ips[@]}; i++))
+do
+  ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo systemctl start glusterd && sudo systemctl enable glusterd"
+done
 
 # enable root ssh access
 for i in ${ips[@]}
