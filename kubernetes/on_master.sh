@@ -46,7 +46,7 @@ function main() {
   read -a ips <<< $(cat $1)
 
   # init kubeadm and save join string taking first ip as master
-  sudo kubeadm init --apiserver-advertise-address=${ips[0]} --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors cri | grep "kubeadm join" > /home/centos/joincommand
+  sudo kubeadm init --apiserver-advertise-address=${ips[0]} --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors cri | grep "kubeadm join" > /home/centos/joincommand
 
   mkdir -p $HOME/.kube
   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -56,7 +56,8 @@ function main() {
   kubectl get pods --all-namespaces | wait_ready
 
   # set up flannel
-  kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+  kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+  kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k8s-manifests/kube-flannel-rbac.yml
 
   # waits for pods
   kubectl get pods --all-namespaces | wait_ready
