@@ -89,19 +89,18 @@ for ((i=0; i<${#ips[@]}; i++))
 do
   if [[ $i -eq 0 ]]
   then
-    ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y git"
+    ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y git" &
+    toWait+=($!)
+  else
+    ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y centos-release-gluster glusterfs-server glusterfs-fuse" &
     toWait+=($!)
   fi
-  ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y centos-release-gluster"
-  ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y glusterfs-server"
-  ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y glusterfs-fuse"
-  toWait+=($!)
 done
 
-# for i in ${toWait[@]}
-# do
-#     wait $i
-# done
+for i in ${toWait[@]}
+do
+    wait $i
+done
 
 
 # start kernel modules
@@ -114,7 +113,7 @@ done
 ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[0]} "$(typeset -f label_nodes); label_nodes"
 
 # start glusterd ONLY ON SLAVES
-for ((i=0; i<${#ips[@]}; i++))
+for ((i=1; i<${#ips[@]}; i++))
 do
   ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo systemctl start glusterd && sudo systemctl enable glusterd"
 done
