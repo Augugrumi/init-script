@@ -8,7 +8,7 @@ echo ${ips[@]}
 for i in ${ips[@]}
 do
     # update machiens and install necessary sw
-    ssh centos@$i -oStrictHostKeyChecking=no -i kp- "bash -x <(curl -s https://raw.githubusercontent.com/Augugrumi/vagrantfiles/oldversion/kubernetes/centos/bootstrap.sh) && sudo reboot" &
+    ssh centos@$i -oStrictHostKeyChecking=no -i kp- "bash -x <(curl -s https://raw.githubusercontent.com/Augugrumi/vagrantfiles/42085960cd671e3f226534ac272bbe9a30b2240f/kubernetes/centos/bootstrap.sh) && sudo reboot" &
     # store all PID of process in order to wait until all machine are ready and rebooted
     toWait+=($!)
 done
