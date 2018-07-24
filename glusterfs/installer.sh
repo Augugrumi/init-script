@@ -72,6 +72,8 @@ while getopts ":a:b:t:" opt; do
             t)
                 topology="$OPTARG"
                 ;;
+            p)
+                ;;
             \?)
                 msg err "Invalid option: -$OPTARG" >&2
                 toExit=1
