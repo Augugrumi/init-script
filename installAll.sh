@@ -13,7 +13,7 @@ function validateIP() {
 
 ips=()
 port=10243
-branch="master"
+branch="centos"
 while getopts ":a:b:p:" opt; do
         case $opt in
             a)
