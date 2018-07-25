@@ -49,17 +49,16 @@ function create_cluster() {
 }
 
 function gluster_launcher() {
-  cd gluster-kubernetes/deploy && ./gk-deploy -s ../../kp- --ssh-user root --ssh-port 22 $1 -y &> out.txt && cat out.txt | tail -n12 | head -n-4 > storageclass.yaml && kubectl apply -f storageclass.yaml
+  cd gluster-kubernetes/deploy && ./gk-deploy -s ../../kp- --ssh-user root --ssh-port 22 $1 -y &> out.txt && cat out.txt | tail -n12 | head -n-4 > storageclass.yaml && kubectl apply -f storageclass.yaml && rm out.txt
 }
 
 # default values
 ips=()
-branch="master"
-topology="topology.json"
+branch="centos"
 toExit=0
 
 # catch arguments passed
-while getopts ":a:b:t:" opt; do
+while getopts ":a:b:p:" opt; do
         case $opt in
             a)
                 valid=$(validateIP $OPTARG)
@@ -72,9 +71,6 @@ while getopts ":a:b:t:" opt; do
                 ;;
             b)
                 branch="$OPTARG"
-                ;;
-            t)
-                topology="$OPTARG"
                 ;;
             p)
                 ;;
