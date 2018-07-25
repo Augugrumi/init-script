@@ -3,7 +3,7 @@
 If you want to deploy k8s, GlusterFS and helm on a set of machine with a certain IP (e.g. 192.168.29.28, 192.168.29.24, 192.168.29.19), supposing that all the machine, except master, have a disk on `/dev/vdb` formatted for Gluster, run the command:
 ```bash
 $ bash <(curl -s https://raw.githubusercontent.com/Augugrumi/init-script/centos/kubernetes/installAll.sh) \
-   -a 192.168.29.28 -a 192.168.29.24 -a 192.168.29.19 -b centos -p 10243
+   -a 192.168.29.28 -a 192.168.29.24 -a 192.168.29.19 -a 192.168.29.12 -b centos -p 10243
 ```
 where:
  + `-a` option is used to specify IP addresses (the first is taken as master node)
