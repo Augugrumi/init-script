@@ -95,18 +95,19 @@ for ((i=0; i<${#ips[@]}; i++))
 do
   if [[ $i -eq 0 ]]
   then
-    ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y git" &
-    toWait+=($!)
-  else
-    ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y centos-release-gluster glusterfs-server glusterfs-fuse" &
+    ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y git"
     toWait+=($!)
   fi
+  ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y centos-release-gluster"
+  ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y glusterfs-server"
+  ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[$i]} "sudo yum install -y glusterfs-fuse"
+  toWait+=($!)
 done
 
-for i in ${toWait[@]}
-do
-    wait $i
-done
+# for i in ${toWait[@]}
+# do
+#     wait $i
+# done
 
 
 # start kernel modules
@@ -131,7 +132,7 @@ do
 done
 
 # clone gluster k8s repository
-ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[0]} "git clone https://github.com/gluster/gluster-kubernetes.git"
+ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[0]} "git clone https://github.com/gluster/gluster-kubernetes.git --depth 1"
 
 # create topology file
 topology=$(mktemp /tmp/topology.XXXXXXXXXX --suffix=".json")
