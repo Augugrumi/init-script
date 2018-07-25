@@ -48,6 +48,10 @@ function create_cluster() {
   echo $start
 }
 
+function gluster_launcher() {
+  cd gluster-kubernetes/deploy && ./gk-deploy -s ../../kp- --ssh-user root --ssh-port 22 $1 -y &> out.txt && cat out.txt | tail -n12 | head -n-4 > storageclass.yaml && kubectl apply -f storageclass.yaml
+}
+
 # default values
 ips=()
 branch="master"
@@ -135,5 +139,5 @@ create_cluster ${ips[@]} > $topology
 scp -i kp- -oStrictHostKeyChecking=no $topology centos@${ips[0]}:$topology
 
 # launch gluster deploy
-ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[0]} "cd gluster-kubernetes/deploy && ./gk-deploy -s ../../kp- --ssh-user root --ssh-port 22 $topology -y > out.txt && cat out.txt | tail -n12 | head -n-4 > storageclass.yaml && kubectl apply -f storageclass.yaml"
+ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[0]} "$(typeset -f gluster_launcher); gluster_launcher $topology"
 
