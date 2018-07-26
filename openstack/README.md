@@ -11,3 +11,12 @@ In that case the script will launch **4** instances, named **k8-{1,2,3,4}** on t
 + `-r` is the image used
 
 The flavour used is **server-medium** (4 VCPUs, 8GB RAM, 12GB disk) with a volume of **40GB** that will be **deleted** when the image will be removed.
+
+----
+
+## delete_and_restart.sh script
+The script `delete_and_restart.sh` can be used to delete the machine (k8-{1..4}) and volumes (v{2..4}) and recreate them. Usage
+```bash
+bash delete_and_restart.sh file.rc
+```
+Where `file.rc` is the file that must be sourced to run openstack commands
