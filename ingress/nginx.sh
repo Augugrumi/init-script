@@ -1,6 +1,6 @@
 #!/bin/bash
 
-git clone https://github.com/nginxinc/kubernetes-ingress.git --depth 1
+git clone https://github.com/nginxinc/kubernetes-ingress.git --depth 1 && cd kubernetes-ingress/helm-chart
 helm install --name nginxcontroller . --set controller.replicaCount=2,controller.service.type=NodePort,controller.service.externalTrafficPolicy=Cluster
 
 echo "To install your services run
