@@ -1,14 +1,19 @@
 #!/bin/bash
 
-function deleting_and_creating_machines() {
-  msg info "Creating machines"
+function deleting_machines() {
+  msg info "Deleting machines..."
   nova delete k8-{1..4} &> /dev/null
+}
+
+function create_machines() {
+  msg info "Creating new machines..."
   vmlaunch -i "k8-" -n "vibes_eth" -s "davmarkp0" -m "4" -r "centos_srv_1805" &> /dev/null
 }
 
 function deleting_and_creating_volumes() {
-  msg info "Creating volumes"
+  msg info "Deleting old volumes..."
   openstack volume delete v2 v3 v4 &> /dev/null
+  msg info "Creating new volumes..."
   openstack volume create --size 40 v2 &> /dev/null && openstack volume create --size 40 v3 &> /dev/null && openstack volume create --size 40 v4 &> /dev/null
 }
 
@@ -19,7 +24,9 @@ toWait=()
 . <(curl -s https://raw.githubusercontent.com/Polpetta/minibashlib/master/minibashlib.sh)
 mb_load "logging"
 
-deleting_and_creating_machines &
+delete_machines
+
+creating_machines &
 toWait+=($!)
 
 deleting_and_creating_volumes &
