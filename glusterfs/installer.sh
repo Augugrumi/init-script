@@ -49,7 +49,7 @@ function create_cluster() {
 }
 
 function gluster_launcher() {
-  cd gluster-kubernetes/deploy && ./gk-deploy -s ../../kp- --ssh-user root --ssh-port 22 $1 -y &> out.txt && cat out.txt | tail -n12 | head -n-4 > storageclass.yaml && kubectl apply -f storageclass.yaml && rm out.txt
+  cd gluster-kubernetes/deploy  && git reset --hard f8647ae9e5d2cae78aa6c1e32c185a75801d22bd && ./gk-deploy -s ../../kp- --ssh-user root --ssh-port 22 $1 -y &> out.txt && cat out.txt | tail -n12 | head -n-4 > storageclass.yaml && kubectl apply -f storageclass.yaml && rm out.txt
 }
 
 # default values
@@ -128,7 +128,7 @@ do
 done
 
 # clone gluster k8s repository
-ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[0]} "git clone https://github.com/gluster/gluster-kubernetes.git && git reset --hard f8647ae9e5d2cae78aa6c1e32c185a75801d22bd"
+ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[0]} "git clone https://github.com/gluster/gluster-kubernetes.git"
 
 # create topology file
 topology=$(mktemp /tmp/topology.XXXXXXXXXX --suffix=".json")
