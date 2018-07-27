@@ -128,7 +128,7 @@ do
 done
 
 # clone gluster k8s repository
-ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[0]} "git clone https://github.com/gluster/gluster-kubernetes.git --depth 1"
+ssh -i kp- -oStrictHostKeyChecking=no centos@${ips[0]} "git clone https://github.com/gluster/gluster-kubernetes.git && git reset --hard f8647ae9e5d2cae78aa6c1e32c185a75801d22bd"
 
 # create topology file
 topology=$(mktemp /tmp/topology.XXXXXXXXXX --suffix=".json")
