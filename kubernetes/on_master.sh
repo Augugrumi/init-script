@@ -64,7 +64,7 @@ function main() {
 
   # set up dashboard
   kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
-  
+
   # waits for pods
   kubectl get pods --all-namespaces | wait_ready
 
@@ -88,6 +88,12 @@ function main() {
     scp -i kp- -oStrictHostKeyChecking=no /home/centos/joincommand centos@$i:/home/centos/joincommand
     ssh centos@$i -oStrictHostKeyChecking=no -i kp- "sudo bash joincommand" &
   done
+
+  curl https://raw.githubusercontent.com/Augugrumi/init-script/$2/ingress/traefik/traefik-rbac.yaml -s --output /tmp/traefik-rbac.yaml
+  kubectl create -f /tmp/traefik-rbac.yaml
+
+  curl https://raw.githubusercontent.com/Augugrumi/init-script/$2/ingress/traefik/traefik-deployment.yaml -s --output /tmp/traefik-deployment.yaml
+  kubectl create -f /tmp/traefik-deployment.yaml
 
   # print the secret token to access kubernetes dashboard
   msg info "******************* YOUR SECRET TOKEN *******************"
